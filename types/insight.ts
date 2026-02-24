@@ -2,30 +2,21 @@ export type Mode = "self" | "others";
 export type ClaimType = "type1" | "type2" | "type3";
 
 export interface SourceItem {
-  label: string;       // このソースが示すことの一言説明
+  label: string;
   url: string;
   institution: string;
-  sourceType: string;  // 統計 / 学術研究 / 政府文書 / 報道
+  sourceType: string;
   verified: boolean;
-}
-
-export interface RecommendedRead {
-  title: string;
-  author: string;
-  year: string;
-  reason: string;  // なぜこの本がこの主張に関連するか（1文）
-  type: "book" | "article";
 }
 
 export interface InsightData {
   claimType: ClaimType;
-  receive: string;     // 受け止める
-  context: string;     // 文脈を広げる
-  evidence: string;    // 事実と知見を届ける
-  elevation: string;   // 視野を一段上げる
-  landing: string;     // 静かに着地させる
+  receive: string;    // その感覚の根っこ
+  context: string;    // なぜこの言説は広まるのか / なぜこの視点が重要か
+  evidence: string;   // データと研究が示すこと
+  elevation: string;  // 構造的に見ると
+  question: string;   // 思考に揺さぶりをかける問い
   sources: SourceItem[];
-  recommendedReads: RecommendedRead[];
   language: string;
   hasUnverifiedSources: boolean;
 }

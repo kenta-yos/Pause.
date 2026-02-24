@@ -20,44 +20,29 @@ function buildTextContent(data: InsightData, mode: Mode): string {
           .join("\n")
       : "なし";
 
-  const readsText =
-    data.recommendedReads.length > 0
-      ? data.recommendedReads
-          .map((r) => `- ${r.author}『${r.title}』(${r.year})\n  ${r.reason}`)
-          .join("\n")
-      : "なし";
-
   return `Pause. — Insight
 生成日時: ${new Date().toLocaleString("ja-JP")}
 モード: ${modeLabel}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-【受け止める】
 ${data.receive}
 
-【文脈を広げる】
 ${data.context}
 
-【事実と知見】
 ${data.evidence}
 
-【視野を一段上げる】
 ${data.elevation}
 
-【着地】
-${data.landing}
+${data.question}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 【参照ソース】
 ${sourcesText}
 
-【もっと知りたい方へ】
-${readsText}
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠ AIが生成したInsightです。ソースおよび推薦書籍はご自身でご確認ください。
+⚠ AIが生成したInsightです。ソースはご自身でご確認ください。
 ※ このInsightはPause.のサーバーおよびデータベースに保存されていません。`;
 }
 

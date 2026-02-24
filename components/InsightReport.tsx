@@ -1,10 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { InsightData, Mode, ClaimType } from "@/types/insight";
+import { InsightData, Mode } from "@/types/insight";
 import { ExportButtons } from "@/components/ExportButtons";
 import { PrivacyNote } from "@/components/PrivacyBadge";
-import { Link2, AlertTriangle, ShieldCheck, RotateCcw, BookOpen } from "lucide-react";
+import { Link2, AlertTriangle, ShieldCheck, RotateCcw } from "lucide-react";
 
 interface Props {
   data: InsightData;
@@ -12,31 +12,15 @@ interface Props {
   onReset: () => void;
 }
 
-const SECTION_LABELS: Record<string, string> = {
-  receive:   "受け止める",
-  context:   "文脈を広げる",
-  evidence:  "事実と知見",
-  elevation: "視野を一段上げる",
-  landing:   "着地",
-};
-
-const TYPE_BADGE: Record<ClaimType, { label: string; color: string }> = {
-  type1: { label: "別の視点を添えて",   color: "bg-amber-50 text-amber-700 border-amber-200" },
-  type2: { label: "この視点を深めて",   color: "bg-sage-50 text-sage-700 border-sage-200" },
-  type3: { label: "整理しながら",       color: "bg-warm-100 text-warm-600 border-warm-200" },
-};
-
 export function InsightReport({ data, mode, onReset }: Props) {
   const modeLabel = mode === "self" ? "自分のために" : "大切な人のために";
-  const badge = TYPE_BADGE[data.claimType] ?? TYPE_BADGE.type3;
 
-  const sections = [
-    { key: "receive",   text: data.receive },
-    { key: "context",   text: data.context },
-    { key: "evidence",  text: data.evidence },
-    { key: "elevation", text: data.elevation },
-    { key: "landing",   text: data.landing },
-  ];
+  const narrative = [
+    data.receive,
+    data.context,
+    data.evidence,
+    data.elevation,
+  ].filter(Boolean);
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -68,28 +52,23 @@ export function InsightReport({ data, mode, onReset }: Props) {
         id="insight-report"
         className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden"
       >
-        {/* Type badge */}
-        <div className="px-6 pt-5 pb-4">
-          <span className={`inline-flex items-center text-xs px-3 py-1 rounded-full border font-medium ${badge.color}`}>
-            {badge.label}
-          </span>
+        {/* Narrative — no labels, flows as one piece */}
+        <div className="px-6 py-7 space-y-5">
+          {narrative.map((text, i) => (
+            <p key={i} className="text-warm-700 text-sm leading-[1.9] whitespace-pre-wrap">
+              {text}
+            </p>
+          ))}
         </div>
 
-        {/* Narrative sections */}
-        <div className="px-6 pb-6 space-y-6">
-          {sections.map(({ key, text }) =>
-            text ? (
-              <div key={key} className="space-y-1.5">
-                <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase">
-                  {SECTION_LABELS[key]}
-                </p>
-                <p className="text-warm-700 text-sm leading-[1.85] whitespace-pre-wrap">
-                  {text}
-                </p>
-              </div>
-            ) : null
-          )}
-        </div>
+        {/* Question — visually distinct */}
+        {data.question && (
+          <div className="mx-6 mb-6 px-5 py-4 bg-sage-50 border-l-2 border-sage-400 rounded-r-2xl">
+            <p className="text-sage-800 text-sm leading-[1.85] italic">
+              {data.question}
+            </p>
+          </div>
+        )}
 
         {/* Sources */}
         {data.sources.length > 0 && (
@@ -121,33 +100,6 @@ export function InsightReport({ data, mode, onReset }: Props) {
                 </li>
               ))}
             </ul>
-          </div>
-        )}
-
-        {/* Recommended reads */}
-        {data.recommendedReads.length > 0 && (
-          <div className="px-6 py-4 border-t border-warm-100 space-y-2">
-            <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase">
-              もっと知りたい方へ
-            </p>
-            <ul className="space-y-3">
-              {data.recommendedReads.map((read, i) => (
-                <li key={i} className="flex items-start gap-2.5">
-                  <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-xs font-medium text-warm-700">
-                      {read.author}『{read.title}』({read.year})
-                    </p>
-                    <p className="text-xs text-warm-400 mt-0.5 leading-relaxed">
-                      {read.reason}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            <p className="text-[10px] text-warm-300 pt-1">
-              AIによる推薦です。出版・掲載状況はご自身でご確認ください。
-            </p>
           </div>
         )}
 
