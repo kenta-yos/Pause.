@@ -49,16 +49,22 @@ export function InsightReport({ data, onReset }: Props) {
           </div>
           <div className="px-6 py-7 space-y-6">
             {data.understanding && (
-              <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
-                {data.understanding}
-              </p>
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium text-warm-600">なぜ信じてしまうのか</h4>
+                <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
+                  {data.understanding}
+                </p>
+              </div>
             )}
             {data.evidence && (
               <>
                 <div className="border-t border-warm-100" />
-                <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
-                  {data.evidence}
-                </p>
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-warm-600">事実とデータ</h4>
+                  <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
+                    {data.evidence}
+                  </p>
+                </div>
               </>
             )}
           </div>
