@@ -30,9 +30,6 @@ ${data.evidence}
 
 ${data.conversation}
 
-【問いかけの例】
-${data.question}
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 【参照ソース】

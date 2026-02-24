@@ -42,8 +42,8 @@ export function InsightReport({ data, onReset }: Props) {
         {/* Section 1: Understanding + Evidence */}
         <div className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-warm-100 flex items-center gap-2.5">
-            <BookOpen className="w-4 h-4 text-warm-400 shrink-0" />
-            <span className="text-[11px] font-medium tracking-widest text-warm-400 uppercase">
+            <BookOpen className="w-4 h-4 text-warm-500 shrink-0" />
+            <span className="text-sm font-medium text-warm-600">
               この言説を読み解く
             </span>
           </div>
@@ -67,26 +67,16 @@ export function InsightReport({ data, onReset }: Props) {
         {/* Section 2: Conversation guide */}
         <div className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-warm-100 flex items-center gap-2.5">
-            <MessageCircle className="w-4 h-4 text-sage-500 shrink-0" />
-            <span className="text-[11px] font-medium tracking-widest text-sage-500 uppercase">
+            <MessageCircle className="w-4 h-4 text-sage-600 shrink-0" />
+            <span className="text-sm font-medium text-sage-700">
               大切な人への伝え方
             </span>
           </div>
-          <div className="px-6 py-7 space-y-6">
+          <div className="px-6 py-7">
             {data.conversation && (
               <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
                 {data.conversation}
               </p>
-            )}
-            {data.question && (
-              <div className="px-5 py-4 bg-sage-50 border-l-2 border-sage-400 rounded-r-2xl space-y-1">
-                <p className="text-[10px] font-medium tracking-widest text-sage-500 uppercase mb-2.5">
-                  問いかけの例
-                </p>
-                <p className="text-sage-700 text-sm leading-[1.9] whitespace-pre-wrap">
-                  {data.question}
-                </p>
-              </div>
             )}
           </div>
         </div>
@@ -114,12 +104,6 @@ export function InsightReport({ data, onReset }: Props) {
           </div>
         )}
 
-        {/* Footer */}
-        <div className="px-5 py-3 bg-warm-50 border border-warm-100 rounded-2xl">
-          <p className="text-[10px] text-warm-300 leading-relaxed">
-            このInsightはどこにも保存されていません。ソースはご自身でご確認ください。
-          </p>
-        </div>
       </div>
 
       <ExportButtons data={data} />

@@ -15,7 +15,7 @@ export function PrivacyNote() {
   return (
     <p className="text-xs text-warm-400 text-center mt-4">
       このInsightはサーバーにもデータベースにも記録されていません。
-      保存したい場合は下のエクスポートボタンをご利用ください。
+      テキストコピーで手元に保存できます。
     </p>
   );
 }
