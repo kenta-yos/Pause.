@@ -8,7 +8,8 @@ import { Mode, InsightData } from "@/types/insight";
 import { Search } from "lucide-react";
 
 interface Props {
-  onResult: (data: InsightData, mode: Mode) => void;
+  onResult: (data: InsightData, mode: Mode, remaining: number | null) => void;
+  remaining: number | null;
 }
 
 const LOADING_PHASES = [
@@ -20,14 +21,13 @@ const LOADING_PHASES = [
   { time: 25000, progress: 93, label: "もう少しお待ちください…" },
 ];
 
-export function InputSection({ onResult }: Props) {
+export function InputSection({ onResult, remaining }: Props) {
   const [claim, setClaim] = useState("");
   const [mode, setMode] = useState<Mode>("self");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState("");
-  const [remaining, setRemaining] = useState<number | null>(null);
 
   const charCount = claim.length;
   const maxChars = 2000;
@@ -63,7 +63,7 @@ export function InputSection({ onResult }: Props) {
 
       const json = await res.json();
       const rem = res.headers.get("X-RateLimit-Remaining");
-      if (rem !== null) setRemaining(Number(rem));
+      const newRemaining = rem !== null ? Number(rem) : null;
 
       if (!res.ok || !json.success) {
         setError(json.error || "エラーが発生しました。");
@@ -73,7 +73,7 @@ export function InputSection({ onResult }: Props) {
       setProgress(100);
       setPhaseLabel("完了");
       await new Promise((r) => setTimeout(r, 300));
-      onResult(json.data, mode);
+      onResult(json.data, mode, newRemaining);
     } catch {
       setError("ネットワークエラーが発生しました。");
     } finally {
@@ -166,10 +166,9 @@ export function InputSection({ onResult }: Props) {
         </button>
       </form>
 
+      {/* Footer: note + remaining count */}
       <div className="flex items-center justify-between text-xs text-warm-300">
-        <p>
-          回答は一次情報源および学術知見を参照。ソースは必ずご自身で確認してください。
-        </p>
+        <p>回答は一次情報源および学術知見を参照。ソースは必ずご自身で確認ください。</p>
         {remaining !== null && (
           <p className="shrink-0 ml-4">残り {remaining} / 400</p>
         )}

@@ -12,6 +12,22 @@ export function hashIp(ip: string): string {
     .digest("hex");
 }
 
+// Read-only: returns current remaining count without incrementing
+export async function getRemainingCount(ip: string): Promise<number> {
+  const db = getDb();
+  const ipHash = hashIp(ip);
+  const windowStart = new Date(Date.now() - WINDOW_MS);
+
+  const existing = await db
+    .select()
+    .from(rateLimits)
+    .where(and(eq(rateLimits.ipHash, ipHash), gte(rateLimits.windowStart, windowStart)))
+    .limit(1);
+
+  if (existing.length === 0) return DAILY_LIMIT;
+  return Math.max(0, DAILY_LIMIT - existing[0].count);
+}
+
 export async function checkRateLimit(
   ip: string
 ): Promise<{ allowed: boolean; remaining: number }> {
