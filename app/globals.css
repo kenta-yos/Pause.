@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Warm neutrals */
+  --color-warm-50: #fdfcf9;
+  --color-warm-100: #f5f2ec;
+  --color-warm-200: #e8e3d8;
+  --color-warm-300: #d4ccbc;
+  --color-warm-400: #a89f8e;
+  --color-warm-500: #8a7f6e;
+  --color-warm-600: #6b6052;
+  --color-warm-700: #4a4238;
+  --color-warm-800: #2e2820;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Sage green */
+  --color-sage-50: #f0f4f0;
+  --color-sage-100: #dde8de;
+  --color-sage-200: #bdd3bf;
+  --color-sage-300: #96b89a;
+  --color-sage-400: #6e9e74;
+  --color-sage-500: #4e7f55;
+  --color-sage-600: #3d6443;
+  --color-sage-700: #2e4c33;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Font */
+  --font-sans: var(--font-geist);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #fdfcf9;
+  color: #2e2820;
+  font-family: var(--font-geist), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color;
+  transition-timing-function: ease;
+  transition-duration: 150ms;
 }
