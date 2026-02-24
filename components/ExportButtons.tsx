@@ -2,33 +2,60 @@
 
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
-import { InsightData } from "@/types/insight";
+import { InsightData, ApproachKey } from "@/types/insight";
 import { cn } from "@/lib/utils";
 
 interface Props {
   data: InsightData;
 }
 
+const APPROACH_LABELS: Record<ApproachKey, string> = {
+  contradiction: "矛盾に気づいてもらう",
+  perspective:   "立場を入れ替えてみる",
+  prebunking:    "なぜ広まるかを先に話す",
+  narrative:     "一人の人間の話をする",
+  analogy:       "相手の価値観から入る",
+};
+
+const APPROACH_ORDER: ApproachKey[] = [
+  "contradiction",
+  "perspective",
+  "prebunking",
+  "narrative",
+  "analogy",
+];
+
 function buildTextContent(data: InsightData): string {
   const sourcesText =
     data.sources.length > 0
       ? data.sources
-          .map((s) => `- ${s.label}（${s.institution} · ${s.sourceType}${s.year ? ` · ${s.year}` : ""}）`)
+          .map(
+            (s) =>
+              `- ${s.label}（${s.institution} · ${s.sourceType}${s.year ? ` · ${s.year}` : ""}）`
+          )
           .join("\n")
       : "なし";
+
+  const approachesText = APPROACH_ORDER.map((key) => {
+    const text = data.approaches?.[key] as string | undefined;
+    const isRec = key === data.approaches?.recommended;
+    return `【${APPROACH_LABELS[key]}${isRec ? "　★特に有効" : ""}】\n${text || ""}`;
+  }).join("\n\n");
 
   return `Pause. — Insight
 生成日時: ${new Date().toLocaleString("ja-JP")}
 
 ━━━ この言説を読み解く ━━━
 
+【なぜ信じてしまうのか】
 ${data.understanding}
 
+【事実とデータ】
 ${data.evidence}
 
 ━━━ 大切な人への伝え方 ━━━
 
-${data.conversation}
+${approachesText}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
