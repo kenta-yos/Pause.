@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { claim, mode } = body;
+  const { claim } = body;
 
   if (!claim || typeof claim !== "string" || claim.trim().length === 0) {
     return NextResponse.json(
@@ -52,15 +52,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (mode !== "self" && mode !== "others") {
-    return NextResponse.json(
-      { success: false, error: "Invalid mode" },
-      { status: 400 }
-    );
-  }
-
   try {
-    const data = await analyzeWithGemini(claim.trim(), mode);
+    const data = await analyzeWithGemini(claim.trim());
     return NextResponse.json(
       { success: true, data },
       {

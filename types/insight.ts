@@ -1,29 +1,29 @@
-export type Mode = "self" | "others";
 export type ClaimType = "type1" | "type2" | "type3";
 
 export interface SourceItem {
   label: string;
-  url: string;
   institution: string;
   sourceType: string;
-  verified: boolean;
+  year?: string;
 }
 
 export interface InsightData {
   claimType: ClaimType;
-  receive: string;    // その感覚の根っこ
-  context: string;    // なぜこの言説は広まるのか / なぜこの視点が重要か
-  evidence: string;   // データと研究が示すこと
-  elevation: string;  // 構造的に見ると
-  question: string;   // 思考に揺さぶりをかける問い
+
+  // Section 1: For the user (academic, objective)
+  understanding: string; // ①その人の現実・心理を理解する
+  evidence: string;      // ②対抗するための事実・学術知見
+
+  // Section 2: How to talk to your loved one
+  conversation: string;  // 具体的な伝え方・例え話・視点転換
+  question: string;      // 問いかけの例
+
   sources: SourceItem[];
   language: string;
-  hasUnverifiedSources: boolean;
 }
 
 export interface AnalyzeRequest {
   claim: string;
-  mode: Mode;
 }
 
 export interface AnalyzeResponse {

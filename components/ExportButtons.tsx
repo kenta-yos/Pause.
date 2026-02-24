@@ -2,38 +2,35 @@
 
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
-import { InsightData, Mode } from "@/types/insight";
+import { InsightData } from "@/types/insight";
 import { cn } from "@/lib/utils";
 
 interface Props {
   data: InsightData;
-  mode: Mode;
 }
 
-function buildTextContent(data: InsightData, mode: Mode): string {
-  const modeLabel = mode === "self" ? "自分のために" : "大切な人のために";
-
+function buildTextContent(data: InsightData): string {
   const sourcesText =
     data.sources.length > 0
       ? data.sources
-          .map((s) => `- ${s.label}（${s.institution} · ${s.sourceType}）\n  ${s.url}`)
+          .map((s) => `- ${s.label}（${s.institution} · ${s.sourceType}${s.year ? ` · ${s.year}` : ""}）`)
           .join("\n")
       : "なし";
 
   return `Pause. — Insight
 生成日時: ${new Date().toLocaleString("ja-JP")}
-モード: ${modeLabel}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━ この言説を読み解く ━━━
 
-${data.receive}
-
-${data.context}
+${data.understanding}
 
 ${data.evidence}
 
-${data.elevation}
+━━━ 大切な人への伝え方 ━━━
 
+${data.conversation}
+
+【問いかけの例】
 ${data.question}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -46,11 +43,11 @@ ${sourcesText}
 ※ このInsightはPause.のサーバーおよびデータベースに保存されていません。`;
 }
 
-export function ExportButtons({ data, mode }: Props) {
+export function ExportButtons({ data }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    const text = buildTextContent(data, mode);
+    const text = buildTextContent(data);
     await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);

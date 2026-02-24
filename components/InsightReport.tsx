@@ -1,27 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { InsightData, Mode } from "@/types/insight";
+import { InsightData } from "@/types/insight";
 import { ExportButtons } from "@/components/ExportButtons";
 import { PrivacyNote } from "@/components/PrivacyBadge";
-import { Link2, AlertTriangle, ShieldCheck, RotateCcw } from "lucide-react";
+import { RotateCcw, BookOpen, MessageCircle } from "lucide-react";
 
 interface Props {
   data: InsightData;
-  mode: Mode;
   onReset: () => void;
 }
 
-export function InsightReport({ data, mode, onReset }: Props) {
-  const modeLabel = mode === "self" ? "自分のために" : "大切な人のために";
-
-  const narrative = [
-    data.receive,
-    data.context,
-    data.evidence,
-    data.elevation,
-  ].filter(Boolean);
-
+export function InsightReport({ data, onReset }: Props) {
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
       {/* Title bar */}
@@ -34,7 +24,7 @@ export function InsightReport({ data, mode, onReset }: Props) {
             </h2>
           </div>
           <p className="text-xs text-warm-400 mt-0.5">
-            Insight — {modeLabel} · {new Date().toLocaleDateString("ja-JP")}
+            Insight · {new Date().toLocaleDateString("ja-JP")}
           </p>
         </div>
         <button
@@ -47,78 +37,92 @@ export function InsightReport({ data, mode, onReset }: Props) {
         </button>
       </div>
 
-      {/* Report card */}
-      <div
-        id="insight-report"
-        className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden"
-      >
-        {/* Narrative — no labels, flows as one piece */}
-        <div className="px-6 py-7 space-y-5">
-          {narrative.map((text, i) => (
-            <p key={i} className="text-warm-700 text-sm leading-[1.9] whitespace-pre-wrap">
-              {text}
-            </p>
-          ))}
+      <div id="insight-report" className="space-y-4">
+
+        {/* Section 1: Understanding + Evidence */}
+        <div className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-warm-100 flex items-center gap-2.5">
+            <BookOpen className="w-4 h-4 text-warm-400 shrink-0" />
+            <span className="text-[11px] font-medium tracking-widest text-warm-400 uppercase">
+              この言説を読み解く
+            </span>
+          </div>
+          <div className="px-6 py-7 space-y-6">
+            {data.understanding && (
+              <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
+                {data.understanding}
+              </p>
+            )}
+            {data.evidence && (
+              <>
+                <div className="border-t border-warm-100" />
+                <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
+                  {data.evidence}
+                </p>
+              </>
+            )}
+          </div>
         </div>
 
-        {/* Question — visually distinct */}
-        {data.question && (
-          <div className="mx-6 mb-6 px-5 py-4 bg-sage-50 border-l-2 border-sage-400 rounded-r-2xl">
-            <p className="text-sage-800 text-sm leading-[1.85] italic">
-              {data.question}
-            </p>
+        {/* Section 2: Conversation guide */}
+        <div className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-warm-100 flex items-center gap-2.5">
+            <MessageCircle className="w-4 h-4 text-sage-500 shrink-0" />
+            <span className="text-[11px] font-medium tracking-widest text-sage-500 uppercase">
+              大切な人への伝え方
+            </span>
           </div>
-        )}
+          <div className="px-6 py-7 space-y-6">
+            {data.conversation && (
+              <p className="text-warm-700 text-sm leading-[1.95] whitespace-pre-wrap">
+                {data.conversation}
+              </p>
+            )}
+            {data.question && (
+              <div className="px-5 py-4 bg-sage-50 border-l-2 border-sage-400 rounded-r-2xl space-y-1">
+                <p className="text-[10px] font-medium tracking-widest text-sage-500 uppercase mb-2.5">
+                  問いかけの例
+                </p>
+                <p className="text-sage-700 text-sm leading-[1.9] whitespace-pre-wrap">
+                  {data.question}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Sources */}
         {data.sources.length > 0 && (
-          <div className="px-6 py-4 border-t border-warm-100 space-y-2">
-            <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase">
+          <div className="bg-white rounded-3xl border border-warm-100 shadow-sm px-6 py-5">
+            <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase mb-3">
               参照ソース
             </p>
-            <ul className="space-y-1.5">
+            <div className="flex flex-wrap gap-2">
               {data.sources.map((src, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  {src.verified ? (
-                    <ShieldCheck className="w-3 h-3 text-sage-500 shrink-0 mt-0.5" />
-                  ) : (
-                    <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
-                  )}
-                  <div className="min-w-0">
-                    <a
-                      href={src.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-blue-500 hover:underline leading-relaxed"
-                    >
-                      {src.label}
-                    </a>
-                    <span className="text-xs text-warm-300 ml-1.5">
-                      {src.institution} · {src.sourceType}
-                    </span>
-                  </div>
-                </li>
+                <div
+                  key={i}
+                  className="px-3 py-2 bg-warm-50 rounded-xl border border-warm-100"
+                >
+                  <p className="text-xs text-warm-600 leading-snug">{src.label}</p>
+                  <p className="text-[10px] text-warm-400 mt-0.5">
+                    {src.institution} · {src.sourceType}
+                    {src.year ? ` · ${src.year}` : ""}
+                  </p>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
 
         {/* Footer */}
-        <div className="px-6 py-3 bg-warm-50 border-t border-warm-100">
-          {data.hasUnverifiedSources && (
-            <div className="flex items-start gap-2 mb-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-              <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              一部のソースリンクが確認できませんでした。
-            </div>
-          )}
-          <p className="text-[10px] text-warm-300 leading-relaxed flex items-center gap-1">
-            <Link2 className="w-3 h-3 shrink-0" />
-            このInsightはどこにも保存されていません。ソースは必ずご自身でご確認ください。
+        <div className="px-5 py-3 bg-warm-50 border border-warm-100 rounded-2xl">
+          <p className="text-[10px] text-warm-300 leading-relaxed">
+            このInsightはどこにも保存されていません。ソースはご自身でご確認ください。
           </p>
         </div>
       </div>
 
-      <ExportButtons data={data} mode={mode} />
+      <ExportButtons data={data} />
       <PrivacyNote />
     </div>
   );

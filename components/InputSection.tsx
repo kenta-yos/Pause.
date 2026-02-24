@@ -2,13 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { ModeSelector } from "@/components/ModeSelector";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
-import { Mode, InsightData } from "@/types/insight";
+import { InsightData } from "@/types/insight";
 import { Search } from "lucide-react";
 
 interface Props {
-  onResult: (data: InsightData, mode: Mode, remaining: number | null) => void;
+  onResult: (data: InsightData, remaining: number | null) => void;
   remaining: number | null;
 }
 
@@ -23,7 +22,6 @@ const LOADING_PHASES = [
 
 export function InputSection({ onResult, remaining }: Props) {
   const [claim, setClaim] = useState("");
-  const [mode, setMode] = useState<Mode>("self");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
@@ -58,7 +56,7 @@ export function InputSection({ onResult, remaining }: Props) {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ claim: claim.trim(), mode }),
+        body: JSON.stringify({ claim: claim.trim() }),
       });
 
       const json = await res.json();
@@ -73,7 +71,7 @@ export function InputSection({ onResult, remaining }: Props) {
       setProgress(100);
       setPhaseLabel("完了");
       await new Promise((r) => setTimeout(r, 300));
-      onResult(json.data, mode, newRemaining);
+      onResult(json.data, newRemaining);
     } catch {
       setError("ネットワークエラーが発生しました。");
     } finally {
@@ -92,17 +90,17 @@ export function InputSection({ onResult, remaining }: Props) {
           </h1>
         </div>
         <p className="text-warm-500 text-sm">
-          一歩立ち止まって、事実から考える
+          大切な人との対話を、一歩深める
         </p>
       </div>
 
       <PrivacyBadge />
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Claim input — font-size 16px to prevent iOS auto-zoom */}
+        {/* Claim input */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-warm-700">
-            気になった言説・主張を入力してください
+            大切な人が信じている言説・主張を入力してください
           </label>
           <div className="relative">
             <textarea
@@ -122,14 +120,6 @@ export function InputSection({ onResult, remaining }: Props) {
               {charCount}/{maxChars}
             </span>
           </div>
-        </div>
-
-        {/* Mode selector */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-warm-700">
-            このInsightは誰のために？
-          </label>
-          <ModeSelector value={mode} onChange={setMode} />
         </div>
 
         {/* Error */}
@@ -166,7 +156,7 @@ export function InputSection({ onResult, remaining }: Props) {
         </button>
       </form>
 
-      {/* Footer: note + remaining count */}
+      {/* Footer */}
       <div className="flex items-center justify-between text-xs text-warm-300">
         <p>回答は一次情報源および学術知見を参照。ソースは必ずご自身で確認ください。</p>
         {remaining !== null && (
