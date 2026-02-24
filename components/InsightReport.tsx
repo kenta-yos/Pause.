@@ -8,6 +8,7 @@ import {
   BookOpen,
   Brain,
   BarChart3,
+  GraduationCap,
   Compass,
   MessageCircle,
   Link2,
@@ -69,6 +70,7 @@ export function InsightReport({ data, mode, onReset }: Props) {
           </p>
         </div>
         <button
+          type="button"
           onClick={onReset}
           className="flex items-center gap-1.5 px-3 py-2 text-sm text-warm-500 hover:text-sage-600 border border-warm-200 hover:border-sage-300 rounded-xl transition-all duration-200"
         >
@@ -157,6 +159,45 @@ export function InsightReport({ data, mode, onReset }: Props) {
             </Section>
           </div>
 
+          {/* Academic Insights */}
+          {data.academicInsights.length > 0 && (
+            <div className="pt-7">
+              <Section
+                icon={GraduationCap}
+                title="学術的知見"
+                color="bg-indigo-50 text-indigo-600"
+              >
+                <div className="space-y-4">
+                  {data.academicInsights.map((insight, i) => (
+                    <div
+                      key={i}
+                      className="bg-indigo-50/40 border border-indigo-100 rounded-2xl px-4 py-3 space-y-2"
+                    >
+                      <p className="text-warm-700 text-sm leading-relaxed">
+                        {insight.argument}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="text-xs font-medium text-indigo-700">
+                          {insight.author}
+                        </span>
+                        <span className="text-xs text-warm-400">
+                          『{insight.work}』{insight.year ? `(${insight.year})` : ""}
+                        </span>
+                        <span className="text-xs text-warm-300">·</span>
+                        <span className="text-xs text-warm-400 italic">
+                          {insight.field}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs text-warm-300 leading-relaxed">
+                  学術知見はAIによる引用です。著作の存在はご自身でご確認ください。
+                </p>
+              </Section>
+            </div>
+          )}
+
           {/* Perspectives */}
           <div className="pt-7">
             <Section
@@ -242,8 +283,7 @@ export function InsightReport({ data, mode, onReset }: Props) {
             </div>
           )}
           <p className="text-xs text-warm-400 leading-relaxed">
-            このInsightはAIが生成したものです。事実セクションは信頼できる一次情報源（政府統計・国際機関）のみを参照していますが、
-            ソースは必ずご自身でご確認ください。分析セクション（別の視点・対話のヒント）はAIによる解釈です。
+            事実セクションは政府統計・国際機関の一次情報源のみを参照。学術知見はAIによる引用のため、著作の存在はご自身でご確認ください。
           </p>
         </div>
       </div>

@@ -1,24 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ModeSelector } from "@/components/ModeSelector";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { Mode, InsightData } from "@/types/insight";
-import { Loader2, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 interface Props {
   onResult: (data: InsightData, mode: Mode) => void;
 }
+
+const LOADING_PHASES = [
+  { time: 0,     progress: 8,  label: "言説を読み取り中…" },
+  { time: 1500,  progress: 25, label: "情報を検索中…" },
+  { time: 4000,  progress: 48, label: "学術知見を参照中…" },
+  { time: 9000,  progress: 68, label: "知識を整理中…" },
+  { time: 16000, progress: 85, label: "Insightを構成中…" },
+  { time: 25000, progress: 93, label: "もう少しお待ちください…" },
+];
 
 export function InputSection({ onResult }: Props) {
   const [claim, setClaim] = useState("");
   const [mode, setMode] = useState<Mode>("self");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [phaseLabel, setPhaseLabel] = useState("");
 
   const charCount = claim.length;
   const maxChars = 2000;
+
+  useEffect(() => {
+    if (!loading) {
+      setProgress(0);
+      setPhaseLabel("");
+      return;
+    }
+    const timers = LOADING_PHASES.map(({ time, progress: p, label }) =>
+      setTimeout(() => {
+        setProgress(p);
+        setPhaseLabel(label);
+      }, time)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, [loading]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,6 +67,9 @@ export function InputSection({ onResult }: Props) {
         return;
       }
 
+      setProgress(100);
+      setPhaseLabel("完了");
+      await new Promise((r) => setTimeout(r, 300));
       onResult(json.data, mode);
     } catch {
       setError("ネットワークエラーが発生しました。");
@@ -67,7 +96,7 @@ export function InputSection({ onResult }: Props) {
       <PrivacyBadge />
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        {/* Claim input */}
+        {/* Claim input — font-size 16px to prevent iOS auto-zoom */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-warm-700">
             気になった言説・主張を入力してください
@@ -79,13 +108,12 @@ export function InputSection({ onResult }: Props) {
               placeholder="例：外国人が増えると治安が悪化する、〇〇は歴史を捏造している…"
               maxLength={maxChars}
               rows={5}
-              className="w-full px-4 py-3 rounded-2xl border-2 border-warm-200 bg-white text-warm-800 placeholder:text-warm-300 resize-none focus:outline-none focus:border-sage-400 transition-colors text-sm leading-relaxed"
+              style={{ fontSize: "16px" }}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-warm-200 bg-white text-warm-800 placeholder:text-warm-300 resize-none focus:outline-none focus:border-sage-400 transition-colors leading-relaxed"
             />
             <span
               className={`absolute bottom-3 right-3 text-xs ${
-                charCount > maxChars * 0.9
-                  ? "text-amber-500"
-                  : "text-warm-300"
+                charCount > maxChars * 0.9 ? "text-amber-500" : "text-warm-300"
               }`}
             >
               {charCount}/{maxChars}
@@ -108,28 +136,35 @@ export function InputSection({ onResult }: Props) {
           </div>
         )}
 
+        {/* Loading progress */}
+        {loading && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-warm-500">
+              <span>{phaseLabel}</span>
+              <span>{progress}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-warm-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-sage-400 rounded-full transition-all duration-700 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Submit */}
         <button
           type="submit"
           disabled={!claim.trim() || loading}
           className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-sage-500 hover:bg-sage-600 disabled:bg-warm-200 disabled:cursor-not-allowed text-white rounded-2xl font-medium transition-all duration-200 shadow-sm hover:shadow-md"
         >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>分析中…少々お待ちください</span>
-            </>
-          ) : (
-            <>
-              <Search className="w-4 h-4" />
-              <span>Insightを生成する</span>
-            </>
-          )}
+          <Search className="w-4 h-4" />
+          <span>{loading ? "分析中…" : "Insightを生成する"}</span>
         </button>
       </form>
 
       <p className="text-xs text-warm-400 text-center">
-        回答は信頼できる一次情報源（政府統計・国際機関・学術機関）のみを参照しています。
+        回答は信頼できる一次情報源（政府統計・国際機関）および学術知見を参照しています。
         <br />
         ソースは必ずご自身で確認してください。
       </p>

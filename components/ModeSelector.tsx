@@ -30,6 +30,7 @@ export function ModeSelector({ value, onChange }: Props) {
       {modes.map(({ id, icon: Icon, label, desc }) => (
         <button
           key={id}
+          type="button"
           onClick={() => onChange(id)}
           className={cn(
             "flex flex-col items-start gap-1 px-4 py-3 rounded-2xl border-2 text-left transition-all duration-200",
