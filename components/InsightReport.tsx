@@ -1,21 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { InsightData, Mode } from "@/types/insight";
+import { InsightData, Mode, ClaimType } from "@/types/insight";
 import { ExportButtons } from "@/components/ExportButtons";
 import { PrivacyNote } from "@/components/PrivacyBadge";
-import {
-  BookOpen,
-  Brain,
-  BarChart3,
-  GraduationCap,
-  Compass,
-  MessageCircle,
-  Link2,
-  AlertTriangle,
-  ShieldCheck,
-  RotateCcw,
-} from "lucide-react";
+import { Link2, AlertTriangle, ShieldCheck, RotateCcw, BookOpen } from "lucide-react";
 
 interface Props {
   data: InsightData;
@@ -23,36 +12,31 @@ interface Props {
   onReset: () => void;
 }
 
-function Section({
-  icon: Icon,
-  title,
-  color,
-  children,
-}: {
-  icon: React.ElementType;
-  title: string;
-  color: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <div className={`p-1.5 rounded-lg ${color}`}>
-          <Icon className="w-4 h-4" />
-        </div>
-        <h3 className="font-medium text-warm-700 text-sm">{title}</h3>
-      </div>
-      <div className="pl-8">{children}</div>
-    </div>
-  );
-}
+const SECTION_LABELS: Record<string, string> = {
+  receive:   "受け止める",
+  context:   "文脈を広げる",
+  evidence:  "事実と知見",
+  elevation: "視野を一段上げる",
+  landing:   "着地",
+};
+
+const TYPE_BADGE: Record<ClaimType, { label: string; color: string }> = {
+  type1: { label: "別の視点を添えて",   color: "bg-amber-50 text-amber-700 border-amber-200" },
+  type2: { label: "この視点を深めて",   color: "bg-sage-50 text-sage-700 border-sage-200" },
+  type3: { label: "整理しながら",       color: "bg-warm-100 text-warm-600 border-warm-200" },
+};
 
 export function InsightReport({ data, mode, onReset }: Props) {
-  const tips =
-    mode === "self"
-      ? data.conversationTips.forSelf
-      : data.conversationTips.forOthers;
   const modeLabel = mode === "self" ? "自分のために" : "大切な人のために";
+  const badge = TYPE_BADGE[data.claimType] ?? TYPE_BADGE.type3;
+
+  const sections = [
+    { key: "receive",   text: data.receive },
+    { key: "context",   text: data.context },
+    { key: "evidence",  text: data.evidence },
+    { key: "elevation", text: data.elevation },
+    { key: "landing",   text: data.landing },
+  ];
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
@@ -84,211 +68,104 @@ export function InsightReport({ data, mode, onReset }: Props) {
         id="insight-report"
         className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden"
       >
-        {/* Input summary */}
-        <div className="px-6 py-5 bg-warm-50 border-b border-warm-100">
-          <div className="flex items-start gap-3">
-            <BookOpen className="w-4 h-4 text-warm-400 mt-0.5 shrink-0" />
-            <div>
-              <p className="text-xs text-warm-400 mb-1">言説の要約</p>
-              <p className="text-warm-700 text-sm leading-relaxed">
-                {data.inputSummary}
-              </p>
-            </div>
-          </div>
+        {/* Type badge */}
+        <div className="px-6 pt-5 pb-4">
+          <span className={`inline-flex items-center text-xs px-3 py-1 rounded-full border font-medium ${badge.color}`}>
+            {badge.label}
+          </span>
         </div>
 
-        <div className="px-6 py-6 space-y-7 divide-y divide-warm-50">
-          {/* Background */}
-          <Section
-            icon={Brain}
-            title="なぜこう感じる人がいるか"
-            color="bg-amber-50 text-amber-600"
-          >
-            <p className="text-warm-600 text-sm leading-relaxed">
-              {data.background}
+        {/* Narrative sections */}
+        <div className="px-6 pb-6 space-y-6">
+          {sections.map(({ key, text }) =>
+            text ? (
+              <div key={key} className="space-y-1.5">
+                <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase">
+                  {SECTION_LABELS[key]}
+                </p>
+                <p className="text-warm-700 text-sm leading-[1.85] whitespace-pre-wrap">
+                  {text}
+                </p>
+              </div>
+            ) : null
+          )}
+        </div>
+
+        {/* Sources */}
+        {data.sources.length > 0 && (
+          <div className="px-6 py-4 border-t border-warm-100 space-y-2">
+            <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase">
+              参照ソース
             </p>
-          </Section>
-
-          {/* Facts */}
-          <div className="pt-7">
-            <Section
-              icon={BarChart3}
-              title="事実とデータ"
-              color="bg-blue-50 text-blue-600"
-            >
-              {data.facts.length > 0 ? (
-                <div className="space-y-4">
-                  {data.facts.map((fact, i) => (
-                    <div
-                      key={i}
-                      className="bg-warm-50 rounded-2xl px-4 py-3 space-y-2"
+            <ul className="space-y-1.5">
+              {data.sources.map((src, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  {src.verified ? (
+                    <ShieldCheck className="w-3 h-3 text-sage-500 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0 mt-0.5" />
+                  )}
+                  <div className="min-w-0">
+                    <a
+                      href={src.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-500 hover:underline leading-relaxed"
                     >
-                      <p className="text-warm-700 text-sm leading-relaxed">
-                        {fact.claim}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        {fact.source.verified ? (
-                          <span className="flex items-center gap-1 text-xs text-sage-600 bg-sage-50 border border-sage-200 px-2 py-0.5 rounded-full">
-                            <ShieldCheck className="w-3 h-3" />
-                            検証済み
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-xs text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                            <AlertTriangle className="w-3 h-3" />
-                            要確認
-                          </span>
-                        )}
-                        <a
-                          href={fact.source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-xs text-blue-500 hover:text-blue-700 hover:underline"
-                        >
-                          <Link2 className="w-3 h-3" />
-                          {fact.source.institution}
-                        </a>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-warm-400 text-sm italic">
-                  今回の分析で確認できた検証済みの一次情報はありませんでした。
-                </p>
-              )}
-            </Section>
-          </div>
-
-          {/* Academic Insights */}
-          {data.academicInsights.length > 0 && (
-            <div className="pt-7">
-              <Section
-                icon={GraduationCap}
-                title="学術的知見"
-                color="bg-indigo-50 text-indigo-600"
-              >
-                <div className="space-y-4">
-                  {data.academicInsights.map((insight, i) => (
-                    <div
-                      key={i}
-                      className="bg-indigo-50/40 border border-indigo-100 rounded-2xl px-4 py-3 space-y-2"
-                    >
-                      <p className="text-warm-700 text-sm leading-relaxed">
-                        {insight.argument}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="text-xs font-medium text-indigo-700">
-                          {insight.author}
-                        </span>
-                        <span className="text-xs text-warm-400">
-                          『{insight.work}』{insight.year ? `(${insight.year})` : ""}
-                        </span>
-                        <span className="text-xs text-warm-300">·</span>
-                        <span className="text-xs text-warm-400 italic">
-                          {insight.field}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-warm-300 leading-relaxed">
-                  学術知見はAIによる引用です。著作の存在はご自身でご確認ください。
-                </p>
-              </Section>
-            </div>
-          )}
-
-          {/* Perspectives */}
-          <div className="pt-7">
-            <Section
-              icon={Compass}
-              title="別の視点"
-              color="bg-purple-50 text-purple-600"
-            >
-              <ul className="space-y-2">
-                {data.perspectives.map((p, i) => (
-                  <li key={i} className="flex gap-2 text-sm text-warm-600 leading-relaxed">
-                    <span className="text-sage-400 shrink-0 mt-0.5">·</span>
-                    {p}
-                  </li>
-                ))}
-              </ul>
-            </Section>
-          </div>
-
-          {/* Conversation tips */}
-          <div className="pt-7">
-            <Section
-              icon={MessageCircle}
-              title={`対話のヒント — ${modeLabel}`}
-              color="bg-sage-50 text-sage-600"
-            >
-              <ul className="space-y-2">
-                {tips.map((tip, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-2 text-sm text-warm-600 leading-relaxed"
-                  >
-                    <span className="text-sage-400 shrink-0 font-medium mt-0.5">
-                      {i + 1}.
+                      {src.label}
+                    </a>
+                    <span className="text-xs text-warm-300 ml-1.5">
+                      {src.institution} · {src.sourceType}
                     </span>
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            </Section>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
+        )}
 
-          {/* References */}
-          {data.references.length > 0 && (
-            <div className="pt-7">
-              <Section
-                icon={Link2}
-                title="参考資料"
-                color="bg-warm-100 text-warm-500"
-              >
-                <ul className="space-y-2">
-                  {data.references.map((ref, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      {ref.verified ? (
-                        <ShieldCheck className="w-3 h-3 text-sage-500 shrink-0 mt-0.5" />
-                      ) : (
-                        <AlertTriangle className="w-3 h-3 text-amber-500 shrink-0 mt-0.5" />
-                      )}
-                      <div>
-                        <a
-                          href={ref.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-blue-500 hover:underline leading-relaxed"
-                        >
-                          {ref.title}
-                        </a>
-                        <p className="text-xs text-warm-400">{ref.institution}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
-            </div>
-          )}
-        </div>
+        {/* Recommended reads */}
+        {data.recommendedReads.length > 0 && (
+          <div className="px-6 py-4 border-t border-warm-100 space-y-2">
+            <p className="text-[10px] font-medium tracking-widest text-warm-300 uppercase">
+              もっと知りたい方へ
+            </p>
+            <ul className="space-y-3">
+              {data.recommendedReads.map((read, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <BookOpen className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-medium text-warm-700">
+                      {read.author}『{read.title}』({read.year})
+                    </p>
+                    <p className="text-xs text-warm-400 mt-0.5 leading-relaxed">
+                      {read.reason}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[10px] text-warm-300 pt-1">
+              AIによる推薦です。出版・掲載状況はご自身でご確認ください。
+            </p>
+          </div>
+        )}
 
-        {/* Disclaimer */}
-        <div className="px-6 py-4 bg-warm-50 border-t border-warm-100">
+        {/* Footer */}
+        <div className="px-6 py-3 bg-warm-50 border-t border-warm-100">
           {data.hasUnverifiedSources && (
-            <div className="flex items-start gap-2 mb-3 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+            <div className="flex items-start gap-2 mb-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
               <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
-              一部のソースリンクが確認できませんでした。「要確認」マークのついたソースは特にご自身でご確認ください。
+              一部のソースリンクが確認できませんでした。
             </div>
           )}
-          <p className="text-xs text-warm-400 leading-relaxed">
-            事実セクションは政府統計・国際機関の一次情報源のみを参照。学術知見はAIによる引用のため、著作の存在はご自身でご確認ください。
+          <p className="text-[10px] text-warm-300 leading-relaxed flex items-center gap-1">
+            <Link2 className="w-3 h-3 shrink-0" />
+            このInsightはどこにも保存されていません。ソースは必ずご自身でご確認ください。
           </p>
         </div>
       </div>
 
-      {/* Export */}
       <ExportButtons data={data} mode={mode} />
       <PrivacyNote />
     </div>

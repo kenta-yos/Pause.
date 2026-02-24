@@ -11,62 +11,53 @@ interface Props {
 }
 
 function buildTextContent(data: InsightData, mode: Mode): string {
-  const tips =
-    mode === "self" ? data.conversationTips.forSelf : data.conversationTips.forOthers;
   const modeLabel = mode === "self" ? "自分のために" : "大切な人のために";
 
-  const academicSection =
-    data.academicInsights.length > 0
-      ? data.academicInsights
-          .map(
-            (a, i) =>
-              `${i + 1}. ${a.argument}\n   ${a.author}「${a.work}」(${a.year || "年不明"}) — ${a.field}`
-          )
-          .join("\n\n")
+  const sourcesText =
+    data.sources.length > 0
+      ? data.sources
+          .map((s) => `- ${s.label}（${s.institution} · ${s.sourceType}）\n  ${s.url}`)
+          .join("\n")
       : "なし";
 
-  return `Pause. — Insight レポート
+  const readsText =
+    data.recommendedReads.length > 0
+      ? data.recommendedReads
+          .map((r) => `- ${r.author}『${r.title}』(${r.year})\n  ${r.reason}`)
+          .join("\n")
+      : "なし";
+
+  return `Pause. — Insight
 生成日時: ${new Date().toLocaleString("ja-JP")}
 モード: ${modeLabel}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-【言説の要約】
-${data.inputSummary}
+【受け止める】
+${data.receive}
 
-【なぜこう感じる人がいるか】
-${data.background}
+【文脈を広げる】
+${data.context}
 
-【事実とデータ】
-${
-  data.facts.length > 0
-    ? data.facts
-        .map(
-          (f, i) =>
-            `${i + 1}. ${f.claim}\n   出典: ${f.source.institution} — ${f.source.url}`
-        )
-        .join("\n\n")
-    : "今回の分析で確認できた検証済みの一次情報はありませんでした。"
-}
+【事実と知見】
+${data.evidence}
 
-【学術的知見】
-${academicSection}
+【視野を一段上げる】
+${data.elevation}
 
-【別の視点】
-${data.perspectives.map((p, i) => `${i + 1}. ${p}`).join("\n")}
-
-【対話のヒント（${modeLabel}）】
-${tips.map((t, i) => `${i + 1}. ${t}`).join("\n")}
-
-【参考資料】
-${
-  data.references.length > 0
-    ? data.references.map((r) => `- ${r.institution}: ${r.title}\n  ${r.url}`).join("\n")
-    : "なし"
-}
+【着地】
+${data.landing}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠ このレポートはAIが生成したものです。ソースは必ずご自身で確認してください。
+
+【参照ソース】
+${sourcesText}
+
+【もっと知りたい方へ】
+${readsText}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠ AIが生成したInsightです。ソースおよび推薦書籍はご自身でご確認ください。
 ※ このInsightはPause.のサーバーおよびデータベースに保存されていません。`;
 }
 

@@ -27,6 +27,7 @@ export function InputSection({ onResult }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState("");
+  const [remaining, setRemaining] = useState<number | null>(null);
 
   const charCount = claim.length;
   const maxChars = 2000;
@@ -61,6 +62,8 @@ export function InputSection({ onResult }: Props) {
       });
 
       const json = await res.json();
+      const rem = res.headers.get("X-RateLimit-Remaining");
+      if (rem !== null) setRemaining(Number(rem));
 
       if (!res.ok || !json.success) {
         setError(json.error || "エラーが発生しました。");
@@ -163,11 +166,14 @@ export function InputSection({ onResult }: Props) {
         </button>
       </form>
 
-      <p className="text-xs text-warm-400 text-center">
-        回答は信頼できる一次情報源（政府統計・国際機関）および学術知見を参照しています。
-        <br />
-        ソースは必ずご自身で確認してください。
-      </p>
+      <div className="flex items-center justify-between text-xs text-warm-300">
+        <p>
+          回答は一次情報源および学術知見を参照。ソースは必ずご自身で確認してください。
+        </p>
+        {remaining !== null && (
+          <p className="shrink-0 ml-4">残り {remaining} / 400</p>
+        )}
+      </div>
     </div>
   );
 }
