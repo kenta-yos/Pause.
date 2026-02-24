@@ -11,6 +11,15 @@ export const metadata: Metadata = {
   title: "Pause. — 一歩立ち止まって、事実から考える",
   description:
     "気になった言説・主張を入力すると、事実と客観性に基づいた別の視点をお届けします。入力内容はどこにも保存されません。",
+  icons: {
+    icon: "/icon.png",
+    apple: "/icon.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "Pause.",
+    statusBarStyle: "default",
+  },
 };
 
 export default function RootLayout({

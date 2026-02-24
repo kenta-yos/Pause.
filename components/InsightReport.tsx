@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { InsightData, Mode } from "@/types/insight";
 import { ExportButtons } from "@/components/ExportButtons";
 import { PrivacyNote } from "@/components/PrivacyBadge";
@@ -57,9 +58,12 @@ export function InsightReport({ data, mode, onReset }: Props) {
       {/* Title bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-light text-warm-800">
-            Pause<span className="text-sage-500">.</span>
-          </h2>
+          <div className="flex items-center gap-2">
+            <Image src="/icon.png" alt="Pause." width={32} height={32} className="rounded-lg" />
+            <h2 className="text-2xl font-light text-warm-800">
+              Pause<span className="text-sage-500">.</span>
+            </h2>
+          </div>
           <p className="text-xs text-warm-400 mt-0.5">
             Insight — {modeLabel} · {new Date().toLocaleDateString("ja-JP")}
           </p>

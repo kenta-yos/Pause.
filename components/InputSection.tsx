@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { ModeSelector } from "@/components/ModeSelector";
 import { PrivacyBadge } from "@/components/PrivacyBadge";
 import { Mode, InsightData } from "@/types/insight";
@@ -52,9 +53,12 @@ export function InputSection({ onResult }: Props) {
     <div className="w-full max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-4xl font-light tracking-tight text-warm-800">
-          Pause<span className="text-sage-500">.</span>
-        </h1>
+        <div className="flex items-center justify-center gap-3">
+          <Image src="/icon.png" alt="Pause." width={40} height={40} className="rounded-xl" />
+          <h1 className="text-4xl font-light tracking-tight text-warm-800">
+            Pause<span className="text-sage-500">.</span>
+          </h1>
+        </div>
         <p className="text-warm-500 text-sm">
           一歩立ち止まって、事実から考える
         </p>
