@@ -2,76 +2,70 @@
 
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
-import { InsightData, ApproachKey } from "@/types/insight";
+import { PersonCentricInsight } from "@/types/insight";
 import { cn } from "@/lib/utils";
 
 interface Props {
-  data: InsightData;
+  data: PersonCentricInsight;
+  targetNickname?: string;
 }
 
-const APPROACH_LABELS: Record<ApproachKey, string> = {
-  contradiction: "矛盾に気づいてもらう",
-  perspective:   "立場を入れ替えてみる",
-  prebunking:    "なぜ広まるかを先に話す",
-  narrative:     "一人の人間の話をする",
-  analogy:       "相手の価値観から入る",
-};
+function buildTextContent(data: PersonCentricInsight, targetNickname?: string): string {
+  const name = targetNickname || "対話相手";
 
-const APPROACH_ORDER: ApproachKey[] = [
-  "contradiction",
-  "perspective",
-  "prebunking",
-  "narrative",
-  "analogy",
-];
+  const anglesText = data.resonantAngles
+    .map((a, i) => `${i + 1}. ${a}`)
+    .join("\n");
 
-function buildTextContent(data: InsightData): string {
-  const sourcesText =
-    data.sources.length > 0
-      ? data.sources
-          .map(
-            (s) =>
-              `- ${s.label}（${s.institution} · ${s.sourceType}${s.year ? ` · ${s.year}` : ""}）`
-          )
-          .join("\n")
-      : "なし";
+  const scriptsText = data.scripts
+    .map(
+      (s, i) =>
+        `${i + 1}. [${s.situation}]\n${s.script}\n→ ${s.note}`
+    )
+    .join("\n\n");
 
-  const approachesText = APPROACH_ORDER.map((key) => {
-    const text = data.approaches?.[key] as string | undefined;
-    const isRec = key === data.approaches?.recommended;
-    return `【${APPROACH_LABELS[key]}${isRec ? "　★特に有効" : ""}】\n${text || ""}`;
-  }).join("\n\n");
+  const avoidText = data.avoidWords.map((w) => `× ${w}`).join("\n");
 
-  return `Pause. — Insight
+  const booksText =
+    data.recommendedBooks?.length > 0
+      ? `━━━ もっと知りたいときに ━━━\n\n${data.recommendedBooks
+          .map((b) => {
+            const meta = [b.publisher, b.year ? `${b.year}年` : "", b.price].filter(Boolean).join(" · ");
+            const link = b.isbn ? `https://www.hanmoto.com/bd/isbn/${b.isbn}` : "";
+            return `- ${b.title}（${b.type}）${meta ? `\n  ${meta}` : ""}${link ? `\n  ${link}` : ""}\n  ${b.reason}`;
+          })
+          .join("\n\n")}\n\n`
+      : "";
+
+  return `Pause. — ${name}さんへの対話アドバイス
 生成日時: ${new Date().toLocaleString("ja-JP")}
 
-━━━ この言説を読み解く ━━━
+━━━ ${name}さんがこの言説を信じる理由 ━━━
 
-【なぜ信じてしまうのか】
-${data.understanding}
+${data.beliefReason}
 
-【事実とデータ】
-${data.evidence}
+━━━ 響く切り口 ━━━
 
-━━━ 大切な人への伝え方 ━━━
+${anglesText}
 
-${approachesText}
+━━━ 今夜使える台詞 ━━━
 
+${scriptsText}
+
+━━━ 避けるべき言葉・態度 ━━━
+
+${avoidText}
+
+${booksText}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-【参照ソース】
-${sourcesText}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠ AIが生成したInsightです。ソースはご自身でご確認ください。
-※ このInsightはPause.のサーバーおよびデータベースに保存されていません。`;
+⚠ AIが生成した対話のヒントです。あくまで参考としてお使いください。`;
 }
 
-export function ExportButtons({ data }: Props) {
+export function ExportButtons({ data, targetNickname }: Props) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    const text = buildTextContent(data);
+    const text = buildTextContent(data, targetNickname);
     await navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
