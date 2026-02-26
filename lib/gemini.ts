@@ -153,7 +153,30 @@ URLは含めない。存在すると確信できるもののみ。
 
 ---
 
-### 6. portraitUpdate（ポートレート更新）
+### 6. recommendedBooks（もっと知りたいときに）
+
+この言説のテーマについて理解を深めるための本・記事・論文を**3〜5つ**推薦する。
+ユーザーが大切な人と話す前に読んでおくと、より深い対話ができるようになるもの。
+
+必ず含めること：
+- **title**: 書名・記事名（実在するものに限る。Google検索で確認すること）
+- **type**: 「本」「新書」「記事」「論文」「レポート」など
+- **reason**: なぜこの本を読むと対話に役立つか（1〜2文。この人との対話に結びつけて書く）
+- **isbn**: ISBN-13（ハイフンなし13桁。Google検索で正確なISBNを確認すること。確信がない場合は空文字列）
+- **publisher**: 出版社名
+- **year**: 出版年（西暦）
+- **price**: 税込価格（例：「1,870円」。不明な場合は空文字列）
+
+推薦の方針：
+- 専門書より**入門書・新書・読みやすいもの**を優先
+- 日本語の本があれば日本語を優先（翻訳書でも可）
+- 対話の技術に関する本も1冊は含めると良い
+- 架空の書名・架空のISBNは絶対に含めないこと
+- ISBNは必ずGoogle検索で実在を確認してから含めること
+
+---
+
+### 7. portraitUpdate（ポートレート更新）
 
 今回の分析で新たにわかった、この人についての理解を1〜3文でまとめる。
 前回のポートレートに追加する形で書く。
@@ -251,10 +274,21 @@ Return ONLY valid JSON. No markdown code blocks. No text outside the JSON object
       "year": "発表年（確信がある場合のみ）"
     }
   ],
+  "recommendedBooks": [
+    {
+      "title": "実在する書名",
+      "type": "本 | 新書 | 記事 | 論文 | レポート",
+      "reason": "この本を読むとこの人との対話にどう役立つか（1〜2文）",
+      "isbn": "9784XXXXXXXXX（13桁、ハイフンなし。確信がなければ空文字列）",
+      "publisher": "出版社名",
+      "year": "出版年",
+      "price": "税込価格（例：1,870円。不明なら空文字列）"
+    }
+  ],
   "portraitUpdate": "ポートレート更新（新たな発見がなければ空文字列）"
 }
 
-IMPORTANT: sourcesにURLを含めないでください。存在すると確信できるソースのみ含める。`;
+IMPORTANT: sourcesにURLを含めないでください。存在すると確信できるソースのみ含める。recommendedBooksも実在する書名のみ（Google検索で確認）。`;
 }
 
 export async function analyzePersonCentric(
@@ -294,6 +328,7 @@ export async function analyzePersonCentric(
       scripts: [],
       avoidWords: [],
       sources: [],
+      recommendedBooks: [],
       portraitUpdate: "",
     };
   }
@@ -313,6 +348,21 @@ export async function analyzePersonCentric(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (s: any) => s?.label && s?.institution
     ),
+    recommendedBooks: Array.isArray(parsed.recommendedBooks)
+      ? parsed.recommendedBooks
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((b: any) => b?.title)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .map((b: any) => ({
+            title: b.title || "",
+            type: b.type || "本",
+            reason: b.reason || "",
+            isbn: b.isbn || "",
+            publisher: b.publisher || "",
+            year: b.year || "",
+            price: b.price || "",
+          }))
+      : [],
     portraitUpdate: parsed.portraitUpdate || "",
   };
 }

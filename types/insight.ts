@@ -22,6 +22,16 @@ export interface ScriptPattern {
   note: string;
 }
 
+export interface RecommendedBook {
+  title: string;
+  type: string;
+  reason: string;
+  isbn?: string;
+  publisher?: string;
+  year?: string;
+  price?: string;
+}
+
 export interface PersonCentricInsight {
   supported?: boolean;
   beliefReason: string;
@@ -29,6 +39,7 @@ export interface PersonCentricInsight {
   scripts: ScriptPattern[];
   avoidWords: string[];
   sources: SourceItem[];
+  recommendedBooks: RecommendedBook[];
   portraitUpdate?: string;
 }
 
