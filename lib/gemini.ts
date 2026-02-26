@@ -1,7 +1,57 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { PersonCentricInsight, TargetData, TargetInsightData, DialogueHistoryEntry } from "@/types/insight";
+import { PersonCentricInsight, RecommendedBook, TargetData, TargetInsightData, DialogueHistoryEntry } from "@/types/insight";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+
+async function verifyBooksWithOpenBD(
+  books: { title: string; type: string; reason: string; isbn: string }[]
+): Promise<RecommendedBook[]> {
+  const booksWithIsbn = books.filter((b) => b.isbn && /^\d{13}$/.test(b.isbn));
+  if (booksWithIsbn.length === 0) return [];
+
+  const isbns = booksWithIsbn.map((b) => b.isbn).join(",");
+  try {
+    const res = await fetch(`https://api.openbd.jp/v1/get?isbn=${isbns}`);
+    const data = await res.json();
+
+    const verified: RecommendedBook[] = [];
+    for (let i = 0; i < data.length; i++) {
+      const entry = data[i];
+      if (!entry) continue; // book not found in OpenBD
+
+      const book = booksWithIsbn[i];
+      const onix = entry.onix || {};
+      const summary = entry.summary || {};
+      const hanmoto = entry.hanmoto || {};
+
+      // Extract metadata from OpenBD
+      const title = summary.title || book.title;
+      const publisher = summary.publisher || "";
+      const pubDate = hanmoto.dateshuppan || "";
+      const year = pubDate ? pubDate.slice(0, 4) : "";
+
+      // Price from ONIX
+      const prices = onix.ProductSupply?.SupplyDetail?.Price;
+      const priceAmount = Array.isArray(prices) && prices.length > 0
+        ? prices[0].PriceAmount
+        : "";
+      const price = priceAmount ? `${Number(priceAmount).toLocaleString()}円` : "";
+
+      verified.push({
+        title,
+        type: book.type,
+        reason: book.reason,
+        isbn: book.isbn,
+        publisher,
+        year,
+        price,
+      });
+    }
+    return verified;
+  } catch {
+    return [];
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function parseJsonResponse(text: string): any {
@@ -348,21 +398,20 @@ export async function analyzePersonCentric(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (s: any) => s?.label && s?.institution
     ),
-    recommendedBooks: Array.isArray(parsed.recommendedBooks)
-      ? parsed.recommendedBooks
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .filter((b: any) => b?.title)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((b: any) => ({
-            title: b.title || "",
-            type: b.type || "本",
-            reason: b.reason || "",
-            isbn: b.isbn || "",
-            publisher: b.publisher || "",
-            year: b.year || "",
-            price: b.price || "",
-          }))
-      : [],
+    recommendedBooks: await verifyBooksWithOpenBD(
+      Array.isArray(parsed.recommendedBooks)
+        ? parsed.recommendedBooks
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .filter((b: any) => b?.title && b?.isbn)
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((b: any) => ({
+              title: b.title || "",
+              type: b.type || "本",
+              reason: b.reason || "",
+              isbn: b.isbn || "",
+            }))
+        : []
+    ),
     portraitUpdate: parsed.portraitUpdate || "",
   };
 }
