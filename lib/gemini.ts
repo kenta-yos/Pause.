@@ -3,54 +3,131 @@ import { PersonCentricInsight, RecommendedBook, TargetData, TargetInsightData, D
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+function extractOpenBDMetadata(
+  entry: Record<string, unknown>,
+  book: { title: string; type: string; reason: string; isbn: string }
+): RecommendedBook {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onix = (entry as any).onix || {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const summary = (entry as any).summary || {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hanmoto = (entry as any).hanmoto || {};
+
+  const title = summary.title || book.title;
+  const publisher = summary.publisher || "";
+  const pubDate = hanmoto.dateshuppan || "";
+  const year = pubDate ? pubDate.slice(0, 4) : "";
+
+  const prices = onix.ProductSupply?.SupplyDetail?.Price;
+  const priceAmount =
+    Array.isArray(prices) && prices.length > 0 ? prices[0].PriceAmount : "";
+  const price = priceAmount
+    ? `${Number(priceAmount).toLocaleString()}円`
+    : "";
+
+  return {
+    title,
+    type: book.type,
+    reason: book.reason,
+    isbn: book.isbn,
+    publisher,
+    year,
+    price,
+  };
+}
+
+async function lookupIsbnByTitle(title: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(title)}&langRestrict=ja&maxResults=3`
+    );
+    const data = await res.json();
+    if (!data.items?.length) return null;
+
+    for (const item of data.items) {
+      const identifiers = item.volumeInfo?.industryIdentifiers || [];
+      const isbn13 = identifiers.find(
+        (id: { type: string; identifier: string }) => id.type === "ISBN_13"
+      );
+      if (isbn13) return isbn13.identifier;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 async function verifyBooksWithOpenBD(
   books: { title: string; type: string; reason: string; isbn: string }[]
 ): Promise<RecommendedBook[]> {
+  if (books.length === 0) return [];
+
+  // Step 1: Try OpenBD with AI-generated ISBNs
   const booksWithIsbn = books.filter((b) => b.isbn && /^\d{13}$/.test(b.isbn));
-  if (booksWithIsbn.length === 0) return [];
+  let openBDResults: (Record<string, unknown> | null)[] = [];
 
-  const isbns = booksWithIsbn.map((b) => b.isbn).join(",");
-  try {
-    const res = await fetch(`https://api.openbd.jp/v1/get?isbn=${isbns}`);
-    const data = await res.json();
-
-    const verified: RecommendedBook[] = [];
-    for (let i = 0; i < data.length; i++) {
-      const entry = data[i];
-      if (!entry) continue; // book not found in OpenBD
-
-      const book = booksWithIsbn[i];
-      const onix = entry.onix || {};
-      const summary = entry.summary || {};
-      const hanmoto = entry.hanmoto || {};
-
-      // Extract metadata from OpenBD
-      const title = summary.title || book.title;
-      const publisher = summary.publisher || "";
-      const pubDate = hanmoto.dateshuppan || "";
-      const year = pubDate ? pubDate.slice(0, 4) : "";
-
-      // Price from ONIX
-      const prices = onix.ProductSupply?.SupplyDetail?.Price;
-      const priceAmount = Array.isArray(prices) && prices.length > 0
-        ? prices[0].PriceAmount
-        : "";
-      const price = priceAmount ? `${Number(priceAmount).toLocaleString()}円` : "";
-
-      verified.push({
-        title,
-        type: book.type,
-        reason: book.reason,
-        isbn: book.isbn,
-        publisher,
-        year,
-        price,
-      });
+  if (booksWithIsbn.length > 0) {
+    try {
+      const isbns = booksWithIsbn.map((b) => b.isbn).join(",");
+      const res = await fetch(`https://api.openbd.jp/v1/get?isbn=${isbns}`);
+      openBDResults = await res.json();
+    } catch {
+      openBDResults = booksWithIsbn.map(() => null);
     }
-    return verified;
-  } catch {
-    return [];
   }
+
+  const verified: RecommendedBook[] = [];
+  const failedBooks: { title: string; type: string; reason: string; isbn: string }[] = [];
+
+  for (let i = 0; i < booksWithIsbn.length; i++) {
+    const entry = openBDResults[i];
+    if (entry) {
+      verified.push(extractOpenBDMetadata(entry, booksWithIsbn[i]));
+    } else {
+      failedBooks.push(booksWithIsbn[i]);
+    }
+  }
+
+  // Also include books without valid ISBN
+  for (const book of books) {
+    if (!book.isbn || !/^\d{13}$/.test(book.isbn)) {
+      failedBooks.push(book);
+    }
+  }
+
+  // Step 2: For failed books, search by title via Google Books → re-verify with OpenBD
+  if (failedBooks.length > 0) {
+    const titleResults = await Promise.all(
+      failedBooks.map((b) => lookupIsbnByTitle(b.title))
+    );
+
+    const rescueBooks: { book: typeof failedBooks[number]; isbn: string }[] = [];
+    for (let i = 0; i < failedBooks.length; i++) {
+      const foundIsbn = titleResults[i];
+      if (foundIsbn && !verified.some((v) => v.isbn === foundIsbn)) {
+        rescueBooks.push({ book: { ...failedBooks[i], isbn: foundIsbn }, isbn: foundIsbn });
+      }
+    }
+
+    if (rescueBooks.length > 0) {
+      try {
+        const isbns = rescueBooks.map((r) => r.isbn).join(",");
+        const res = await fetch(`https://api.openbd.jp/v1/get?isbn=${isbns}`);
+        const data = await res.json();
+
+        for (let i = 0; i < data.length; i++) {
+          if (data[i]) {
+            verified.push(extractOpenBDMetadata(data[i], rescueBooks[i].book));
+          }
+        }
+      } catch {
+        // rescue failed, skip
+      }
+    }
+  }
+
+  return verified;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
