@@ -26,16 +26,7 @@ function buildTextContent(data: PersonCentricInsight, targetNickname?: string): 
 
   const avoidText = data.avoidWords.map((w) => `× ${w}`).join("\n");
 
-  const booksText =
-    data.recommendedBooks?.length > 0
-      ? `━━━ もっと知りたいときに ━━━\n\n${data.recommendedBooks
-          .map((b) => {
-            const meta = [b.publisher, b.year ? `${b.year}年` : "", b.price].filter(Boolean).join(" · ");
-            const link = b.isbn ? `https://www.hanmoto.com/bd/isbn/${b.isbn}` : "";
-            return `- ${b.title}（${b.type}）${meta ? `\n  ${meta}` : ""}${link ? `\n  ${link}` : ""}\n  ${b.reason}`;
-          })
-          .join("\n\n")}\n\n`
-      : "";
+  const booksText = "";
 
   return `Pause. — ${name}さんへの対話アドバイス
 生成日時: ${new Date().toLocaleString("ja-JP")}
