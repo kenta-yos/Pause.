@@ -23,6 +23,7 @@ export interface ScriptPattern {
 }
 
 export interface PersonCentricInsight {
+  supported?: boolean;
   beliefReason: string;
   resonantAngles: string[];
   scripts: ScriptPattern[];

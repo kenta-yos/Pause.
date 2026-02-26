@@ -52,9 +52,28 @@ function buildPersonCentricPrompt(
 
 ## アプリのコンセプト
 
-「Pause.」は、右翼的・保守的な言説を信じている「大切な人」（家族・友人・パートナー）と、どのように向き合い、対話すべきかを考えるためのアプリです。
+「Pause.」は、事実やエビデンスと異なる可能性のある言説を信じている「大切な人」（家族・友人・パートナー）と、どのように向き合い、対話すべきかを考えるためのアプリです。
 
 このアプリは「人中心」のアプローチを取ります。汎用的な分析ではなく、ユーザーが登録した**特定の人物**に合わせて、その人に響く具体的な対話アドバイスを生成します。
+
+---
+
+## ★最初にやること：言説のスクリーニング
+
+以下の入力された言説を評価し、**科学的コンセンサス、国際的な人権基準、または圧倒的な学術的エビデンスによって支持されている立場かどうか**を判断してください。
+
+例えば以下のような言説は「支持されている立場」に該当します：
+- 同性婚や婚姻の平等を支持する主張
+- 気候変動への対策を求める主張
+- 人種・性別・性的指向による差別に反対する主張
+- 移民や難民の人権を守るべきという主張
+- ジェンダー平等を推進する主張
+
+**該当する場合**：以下のJSONのみを返し、それ以降の分析は一切行わないでください。
+
+{ "supported": true }
+
+**該当しない場合**：supported フィールドは含めず、以下の通常の分析を行ってください。
 
 ---
 
@@ -245,6 +264,19 @@ export async function analyzePersonCentric(
     parsed = parseJsonResponse(text);
   } catch {
     throw new Error("Failed to parse Gemini response as JSON");
+  }
+
+  // Screening: claim is supported by evidence
+  if (parsed.supported === true) {
+    return {
+      supported: true,
+      beliefReason: "",
+      resonantAngles: [],
+      scripts: [],
+      avoidWords: [],
+      sources: [],
+      portraitUpdate: "",
+    };
   }
 
   return {

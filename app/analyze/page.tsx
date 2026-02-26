@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft, Search, Leaf } from "lucide-react";
 import { TargetSelector } from "@/components/TargetSelector";
 import { PersonCentricReport } from "@/components/PersonCentricReport";
 import { PersonCentricInsight } from "@/types/insight";
@@ -31,6 +31,7 @@ function AnalyzeContent() {
   const [progress, setProgress] = useState(0);
   const [phaseLabel, setPhaseLabel] = useState("");
   const [result, setResult] = useState<PersonCentricInsight | null>(null);
+  const [supported, setSupported] = useState(false);
   const [targetNickname, setTargetNickname] = useState("");
 
   const charCount = claim.length;
@@ -86,7 +87,12 @@ function AnalyzeContent() {
       setProgress(100);
       setPhaseLabel("完了");
       await new Promise((r) => setTimeout(r, 300));
-      setResult(json.data);
+
+      if (json.supported || json.data?.supported) {
+        setSupported(true);
+      } else {
+        setResult(json.data);
+      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setError("ネットワークエラーが発生しました。");
@@ -97,8 +103,39 @@ function AnalyzeContent() {
 
   function handleReset() {
     setResult(null);
+    setSupported(false);
     setClaim("");
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (supported) {
+    return (
+      <div className="w-full max-w-2xl mx-auto space-y-6">
+        <div className="bg-sage-50/60 rounded-3xl border border-sage-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-8 text-center space-y-4">
+            <div className="inline-flex p-3 bg-sage-100 rounded-2xl">
+              <Leaf className="w-6 h-6 text-sage-600" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-lg font-medium text-sage-800">
+                この件では、Pause.の出番は少なそうです
+              </h3>
+              <p className="text-sm text-sage-600 leading-relaxed max-w-md mx-auto">
+                {targetNickname
+                  ? `${targetNickname}さんが気になる別の主張があれば、ぜひそちらでお試しください。`
+                  : "別の主張で、もう一度お試しください。"}
+              </p>
+            </div>
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-sage-500 hover:bg-sage-600 text-white rounded-xl font-medium transition-all duration-200 text-sm"
+            >
+              別の言説を入力する
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (result) {

@@ -139,6 +139,14 @@ export async function POST(req: NextRequest) {
       historyData
     );
 
+    // Supported claim — return without saving
+    if (data.supported) {
+      return NextResponse.json(
+        { success: true, data, supported: true },
+        { headers: { "X-RateLimit-Remaining": String(remaining) } }
+      );
+    }
+
     // Save to dialogue history
     const [saved] = await db
       .insert(dialogueHistory)
