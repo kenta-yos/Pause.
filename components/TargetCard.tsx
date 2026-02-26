@@ -34,7 +34,7 @@ export function TargetCard({ id, nickname, relationship, lastAnalyzedAt }: Props
         <div className="flex items-center gap-1.5 mt-3 pt-3 border-t border-warm-50">
           <MessageCircle className="w-3 h-3 text-warm-300" />
           <span className="text-xs text-warm-400">
-            最終分析: {new Date(lastAnalyzedAt).toLocaleDateString("ja-JP")}
+            最終利用: {new Date(lastAnalyzedAt).toLocaleDateString("ja-JP")}
           </span>
         </div>
       )}

@@ -9,7 +9,6 @@ import {
   Lightbulb,
   MessageSquare,
   ShieldAlert,
-  BookOpen,
 } from "lucide-react";
 
 interface Props {
@@ -40,7 +39,7 @@ export function PersonCentricReport({ data, targetNickname, onReset }: Props) {
           className="flex items-center gap-1.5 px-3 py-2 text-sm text-warm-500 hover:text-sage-600 border border-warm-200 hover:border-sage-300 rounded-xl transition-all duration-200"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          新しい分析
+          もう一度考える
         </button>
       </div>
 
@@ -124,36 +123,10 @@ export function PersonCentricReport({ data, targetNickname, onReset }: Props) {
         </div>
       )}
 
-      {/* Card 5: Sources */}
-      {data.sources.length > 0 && (
-        <div className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-warm-100 flex items-center gap-2.5">
-            <BookOpen className="w-4 h-4 text-warm-400 shrink-0" />
-            <span className="text-sm font-medium text-warm-500">参照知見</span>
-          </div>
-          <div className="px-6 py-4">
-            <div className="flex flex-wrap gap-2">
-              {data.sources.map((src, i) => (
-                <div
-                  key={i}
-                  className="px-3 py-2 bg-warm-50 rounded-xl border border-warm-100"
-                >
-                  <p className="text-xs text-warm-600 leading-snug">{src.label}</p>
-                  <p className="text-[10px] text-warm-400 mt-0.5">
-                    {src.institution} · {src.sourceType}
-                    {src.year ? ` · ${src.year}` : ""}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       <ExportButtons data={data} targetNickname={targetNickname} />
 
       <p className="text-xs text-warm-400 text-center mt-4">
-        AIが生成した対話アドバイスです。ソースはご自身でご確認ください。
+        AIが生成した対話のヒントです。あくまで参考としてお使いください。
       </p>
     </div>
   );

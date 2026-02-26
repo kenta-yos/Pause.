@@ -11,7 +11,7 @@ import { PersonCentricInsight } from "@/types/insight";
 
 const LOADING_PHASES = [
   { time: 0, progress: 8, label: "言説を読み取り中…" },
-  { time: 1500, progress: 25, label: "プロフィールを分析中…" },
+  { time: 1500, progress: 25, label: "プロフィールを読み込み中…" },
   { time: 4000, progress: 48, label: "学術知見を参照中…" },
   { time: 9000, progress: 68, label: "対話パターンを検討中…" },
   { time: 16000, progress: 85, label: "台詞を構成中…" },
@@ -212,7 +212,7 @@ function AnalyzeContent() {
           className="w-full flex items-center justify-center gap-2 px-6 py-3.5 bg-sage-500 hover:bg-sage-600 disabled:bg-warm-200 disabled:cursor-not-allowed text-white rounded-2xl font-medium transition-all duration-200 shadow-sm hover:shadow-md"
         >
           <Search className="w-4 h-4" />
-          <span>{loading ? "分析中…" : "対話アドバイスを生成する"}</span>
+          <span>{loading ? "考え中…" : "この人との話し方を考える"}</span>
         </button>
       </form>
 
@@ -243,9 +243,9 @@ export default function AnalyzePage() {
         </div>
 
         <div className="space-y-1">
-          <h2 className="text-xl font-medium text-warm-800">対話を分析する</h2>
+          <h2 className="text-xl font-medium text-warm-800">話し方を考える</h2>
           <p className="text-sm text-warm-400">
-            大切な人が信じている言説を入力すると、その人に合った対話アドバイスを生成します
+            大切な人が信じている言説を入力すると、その人に合った対話のヒントを提案します
           </p>
         </div>
 

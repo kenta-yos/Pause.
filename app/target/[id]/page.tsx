@@ -117,7 +117,7 @@ export default function TargetDetailPage({ params }: { params: Promise<{ id: str
               className="flex items-center gap-1.5 px-4 py-2.5 bg-sage-500 hover:bg-sage-600 text-white text-sm rounded-xl font-medium transition-all duration-200 shadow-sm"
             >
               <Search className="w-3.5 h-3.5" />
-              分析する
+              話し方を考える
             </Link>
             <Link
               href={`/target/${targetId}/edit`}
