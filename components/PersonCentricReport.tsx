@@ -9,7 +9,6 @@ import {
   Lightbulb,
   MessageSquare,
   ShieldAlert,
-  BookOpen,
 } from "lucide-react";
 
 interface Props {
@@ -118,49 +117,6 @@ export function PersonCentricReport({ data, targetNickname, onReset }: Props) {
               <div key={i} className="flex gap-2.5">
                 <span className="text-red-300 shrink-0">×</span>
                 <p className="text-red-700 text-sm leading-relaxed">{word}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Card 5: Recommended books */}
-      {data.recommendedBooks?.length > 0 && (
-        <div className="bg-white rounded-3xl border border-warm-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-warm-100 flex items-center gap-2.5">
-            <BookOpen className="w-4 h-4 text-warm-500 shrink-0" />
-            <span className="text-sm font-medium text-warm-600">もっと知りたいときに</span>
-          </div>
-          <div className="divide-y divide-warm-50">
-            {data.recommendedBooks.map((book, i) => (
-              <div key={i} className="px-6 py-4">
-                <div className="flex items-start gap-2">
-                  {book.isbn ? (
-                    <a
-                      href={`https://www.hanmoto.com/bd/isbn/${book.isbn}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-sage-700 hover:text-sage-500 underline underline-offset-2 decoration-sage-200 hover:decoration-sage-400 transition-colors"
-                    >
-                      {book.title}
-                    </a>
-                  ) : (
-                    <p className="text-sm font-medium text-warm-700">{book.title}</p>
-                  )}
-                  <span className="text-[10px] text-warm-400 border border-warm-100 rounded px-1.5 py-0.5 shrink-0 mt-0.5">
-                    {book.type}
-                  </span>
-                </div>
-                {(book.publisher || book.year || book.price) && (
-                  <p className="text-[11px] text-warm-400 mt-1">
-                    {[book.publisher, book.year ? `${book.year}年` : "", book.price]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                )}
-                {book.reason && (
-                  <p className="text-xs text-warm-500 mt-1.5 leading-relaxed">{book.reason}</p>
-                )}
               </div>
             ))}
           </div>
