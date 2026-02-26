@@ -8,9 +8,9 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Pause. — 一歩立ち止まって、事実から考える",
+  title: "Pause. — 大切な人との対話を、一歩深める",
   description:
-    "気になった言説・主張を入力すると、事実と客観性に基づいた別の視点をお届けします。入力内容はどこにも保存されません。",
+    "大切な人が信じている言説を入力すると、その人に合った具体的な対話アドバイスを生成します。",
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",

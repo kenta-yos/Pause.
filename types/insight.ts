@@ -1,3 +1,4 @@
+// --- Legacy types (kept for reference) ---
 export type ClaimType = "type1" | "type2" | "type3";
 export type ApproachKey =
   | "contradiction"
@@ -13,34 +14,65 @@ export interface SourceItem {
   year?: string;
 }
 
-export interface InsightData {
-  claimType: ClaimType;
+// --- v2: Person-centric types ---
 
-  // Section 1: For the user (academic, objective)
-  understanding: string; // なぜ信じてしまうのか
-  evidence: string;      // 事実とデータ
+export interface ScriptPattern {
+  situation: string;
+  script: string;
+  note: string;
+}
 
-  // Section 2: 5 structured conversation approaches
-  approaches: {
-    contradiction: string;      // ①矛盾に気づいてもらう
-    perspective: string;        // ②立場を入れ替えてみる
-    prebunking: string;         // ③なぜ広まるかを先に話す
-    narrative: string;          // ④一人の人間の話をする
-    analogy: string;            // ⑤相手の価値観から入る
-    recommended: ApproachKey;   // この言説に特に有効なアプローチ
-    recommendedReason: string;  // なぜ有効か（1〜2文）
-  };
-
+export interface PersonCentricInsight {
+  beliefReason: string;
+  resonantAngles: string[];
+  scripts: ScriptPattern[];
+  avoidWords: string[];
   sources: SourceItem[];
-  language: string;
+  portraitUpdate?: string;
 }
 
-export interface AnalyzeRequest {
+export interface TargetData {
+  id: number;
+  userId: number;
+  nickname: string;
+  ageGroup: string | null;
+  lifeContext: string | null;
+  values: string | null;
+  infoSources: string | null;
+  relationship: string | null;
+  dialoguePattern: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TargetInsightData {
+  id: number;
+  targetId: number;
+  summary: string;
+  updatedAt: string;
+}
+
+export interface DialogueHistoryEntry {
+  id: number;
+  targetId: number;
   claim: string;
+  output: PersonCentricInsight;
+  createdAt: string;
 }
 
-export interface AnalyzeResponse {
-  success: boolean;
-  data?: InsightData;
-  error?: string;
+export interface AnalyzeRequestV2 {
+  claim: string;
+  targetId: number;
 }
+
+export interface CreateTargetRequest {
+  nickname: string;
+  ageGroup?: string;
+  lifeContext?: string;
+  values?: string;
+  infoSources?: string;
+  relationship?: string;
+  dialoguePattern?: string;
+}
+
+export interface UpdateTargetRequest extends CreateTargetRequest {}
