@@ -3,7 +3,7 @@ import { rateLimits } from "@/db/schema";
 import { eq, and, gte } from "drizzle-orm";
 import { createHash } from "crypto";
 
-const DAILY_LIMIT = 400;
+const DAILY_LIMIT = 200;
 const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export function hashIp(ip: string): string {

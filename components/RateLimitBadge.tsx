@@ -16,7 +16,7 @@ export function RateLimitBadge() {
 
   return (
     <span className="text-xs text-warm-400 px-2 py-1 bg-warm-50 border border-warm-100 rounded-lg">
-      残り {remaining} / 400
+      残り {remaining} / 200
     </span>
   );
 }
